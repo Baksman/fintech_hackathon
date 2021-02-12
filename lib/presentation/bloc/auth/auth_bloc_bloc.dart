@@ -7,13 +7,14 @@ import 'package:fintech_hackathon/core/error/failure.dart';
 import 'package:fintech_hackathon/core/utils/validators/email_validator.dart';
 import 'package:fintech_hackathon/domain/entity/user_entity.dart';
 import 'package:fintech_hackathon/domain/usecase/auth_usecase/login.dart';
+import 'package:flutter/foundation.dart';
 part 'auth_bloc_event.dart';
 part 'auth_bloc_state.dart';
 
 class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   final EmailVal emailValidator;
   final LoginUseCase loginUseCase;
-  AuthBlocBloc({this.emailValidator, this.loginUseCase})
+  AuthBlocBloc({@required this.emailValidator, @required this.loginUseCase})
       : super(AuthBlocInitial());
 
   @override
@@ -40,13 +41,13 @@ class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
       yield AuthBlocLoggedIn();
     });
   }
+
   Stream<AuthBlocState> _tryToSignUp(
-    SignUpEvent event, String email, String password) async*{
-      emailValidator.validateEmail(email).fold(
-        (error) async*=> yield EmailErrorState(),
-        (validated_email)async*=> yield AuthBlocLoggedIn()
-      );
-    }
+      SignUpEvent event, String email, String password) async* {
+    emailValidator.validateEmail(email).fold((error) async* {
+      yield EmailErrorState(error.errorMessage);
+    }, (_) async* {
+      yield AuthBlocLoggedIn();
+    });
+  }
 }
-
-
